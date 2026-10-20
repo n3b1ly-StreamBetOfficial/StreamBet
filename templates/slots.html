@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center;">
+    <a href="{{ url_for('player') }}" style="color:#aaa; text-decoration:none;">⬅ Назад в лобби</a>
+    <span class="balance">{{ player.balance }} 💰</span>
+</div>
+
+<h1>🎰 Слоты</h1>
+
+<div class="grid2">
+    <div class="card" style="text-align:center; border-top: 4px solid #d4af37; background: radial-gradient(circle at center, #2a0a4a 0%, #05130b 100%);">
+        <h2>Однорукий бандит</h2>
+        <div style="display:flex; justify-content:center; gap: 20px; font-size: 80px; margin: 30px 0;">
+            <div style="background:#000; padding:20px; border-radius:15px; border:2px solid #d4af37;">❓</div>
+            <div style="background:#000; padding:20px; border-radius:15px; border:2px solid #d4af37;">❓</div>
+            <div style="background:#000; padding:20px; border-radius:15px; border:2px solid #d4af37;">❓</div>
+        </div>
+
+        <form method="POST" action="{{ url_for('slots_spin') }}">
+            <input type="number" name="bet" min="1" value="100" placeholder="Ставка" required style="font-size:24px; text-align:center;">
+            <button type="submit" style="margin-top:15px; font-size:20px; padding:20px; background: linear-gradient(90deg, #d4af37 0%, #ffaa00 100%); color:#000;">🎰 КРУТИТЬ</button>
+        </form>
+        <p style="color:#aaa; font-size:12px; margin-top:20px;">3 одинаковых = x10 | Два 💎 = x20 | Три 7️⃣ = x50</p>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #ff4757; display: flex; flex-direction: column;">
+        <h2 style="margin:0; font-size: 18px; margin-bottom: 10px;">💬 Общий Чат</h2>
+        
+        <div id="chat-box" style="background: rgba(0,0,0,0.6); padding: 15px; border-radius: 10px; height: 260px; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 8px;">
+            {% for msg in chat %}
+                <div style="font-size: 14px;">
+                    <span style="color: #666; font-size: 11px;">[{{ msg.time }}]</span>
+                    {% if msg.is_admin %}
+                        <span style="color: #ffd700; font-weight: bold;">[BOSS] {{ msg.author }}:</span>
+                    {% else %}
+                        <span style="color: #00bfff; font-weight: bold;">{{ msg.author }}:</span>
+                    {% endif %}
+                    <span style="color: #fff;">{{ msg.text }}</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <form id="chat-form" style="display:flex; gap:10px; margin-top: 10px;">
+            <input type="text" id="chat-input" placeholder="Написать в чат..." style="flex: 1; margin: 0; padding: 10px;" maxlength="50">
+            <button type="button" onclick="sendMessage()" style="width: auto; padding: 10px 20px;">Отправить</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <h2>📜 Твои последние спины</h2>
+    <table>
+        <tr><th>Время</th><th>Ставка</th><th>Выпало</th><th>Итог</th></tr>
+        {% for h in history %}
+        <tr>
+            <td>{{ h.time }}</td>
+            <td>{{ h.bet }}</td>
+            <td style="font-size:20px;">{{ h.result[0] }} {{ h.result[1] }} {{ h.result[2] }}</td>
+            <td style="color:{{ '#2ecc71' if h.win else '#e74c3c' }}; font-family:'Roboto Mono';">
+                {{ '+' + h.win|string if h.win else '-' + h.bet|string }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<script>
+    function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+        const formData = new FormData();
+        formData.append('message', text);
+        fetch('/send_message', { method: 'POST', body: formData }).then(() => { input.value = ''; });
+    }
+    document.getElementById('chat-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+    });
+    setInterval(function() {
+        fetch('/api/chat')
+        .then(response => response.json())
+        .then(data => {
+            const chatBox = document.getElementById('chat-box');
+            if (data.chat.length > 0) {
+                chatBox.innerHTML = '';
+                data.chat.forEach(msg => {
+                    let authorColor = msg.is_admin ? '#ffd700' : '#00bfff';
+                    let authorPrefix = msg.is_admin ? '[BOSS] ' : '';
+                    chatBox.innerHTML += `<div style="font-size: 14px;"><span style="color: #666; font-size: 11px;">[${msg.time}]</span> <span style="color: ${authorColor}; font-weight: bold;">${authorPrefix}${msg.author}:</span> <span style="color: #fff;">${msg.text}</span></div>`;
+                });
+            }
+        });
+    }, 2000);
+</script>
+{% endblock %}

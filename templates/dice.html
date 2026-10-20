@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center;">
+    <a href="{{ url_for('player') }}" style="color:#aaa; text-decoration:none;">⬅ Назад в лобби</a>
+    <span class="balance">{{ player.balance }} 💰</span>
+</div>
+
+<h1>🎲 Кости</h1>
+
+<div class="grid2">
+    <div class="card" style="border-top: 4px solid #9b59b6; text-align: center;">
+        <h2>Сделать ставку</h2>
+        <form method="POST" action="{{ url_for('dice_roll') }}">
+            <input type="number" name="bet" min="1" value="100" required style="font-size:24px; text-align:center;">
+            
+            <p style="color:#aaa; font-size:14px; margin-top:15px;">Выбери число от 1 до 6:</p>
+            <select name="number" style="font-size:20px; padding:15px; text-align:center;">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+            </select>
+            
+            <button type="submit" style="margin-top:15px; font-size:20px; padding:20px; background: linear-gradient(90deg, #9b59b6 0%, #8e44ad 100%);">🎲 БРОСИТЬ КОСТИ</button>
+        </form>
+        <p style="color:#aaa; font-size:12px; margin-top:20px;">Если угадал — множитель x5!</p>
+    </div>
+
+    <div class="card" style="border-left: 4px solid #f1c40f; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <h2>Результат</h2>
+        <div style="font-size: 120px; margin: 20px 0; animation: pop 0.5s;">
+            {% if request.method == 'POST' %}
+                {% if 'success' in get_flashed_messages() %}🎉{% else %}💀{% endif %}
+            {% else %}❓{% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>📜 Твои последние броски</h2>
+    <table>
+        <tr><th>Время</th><th>Ставка</th><th>Выпало</th><th>Итог</th></tr>
+        {% for h in player.history if h.game == 'dice' %}
+        <tr>
+            <td>{{ h.time }}</td>
+            <td>{{ h.bet }}</td>
+            <td>{{ h.result }}</td>
+            <td style="color:{{ '#2ecc71' if h.win else '#e74c3c' }};">
+                {{ '+' + h.win|string if h.win else '-' + h.bet|string }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

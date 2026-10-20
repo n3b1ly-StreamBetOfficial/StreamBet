@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>🎰 StreamBet</h1>
+<p style="text-align:center; color:#aaa; margin-bottom:30px;">Live Casino · Стрим-режим · Банк</p>
+
+<div class="card" style="max-width:400px; margin:0 auto;">
+    <h2>Вход в систему</h2>
+    <form method="POST">
+        <input type="text" name="uid" placeholder="Ваш ID (4 цифры)" maxlength="4" required>
+        <input type="password" name="pin" placeholder="PIN-код" required minlength="4">
+        <button type="submit">Войти</button>
+    </form>
+    
+    <p style="text-align:center; margin-top:20px;">
+        <a href="{{ url_for('register') }}" style="color:#2ecc71; text-decoration:none; font-weight:bold;">Нет аккаунта? Зарегистрироваться</a>
+    </p>
+    
+    <p style="text-align:center; color:#888; font-size:13px; margin-top:15px;">
+        🔒 PIN хранится в виде хэша. Никто не увидит его.
+    </p>
+    {% if banned %}<div class="flash error" style="margin-top:15px;">⛔ Вы забанены Боссом.</div>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center;">
+    <a href="{{ url_for('player') }}" style="color:#aaa; text-decoration:none;">⬅ Назад в лобби</a>
+    <span class="balance">{{ player.balance }} 💰</span>
+</div>
+
+<h1>🚀 КРАШ</h1>
+
+<div class="card" style="text-align:center; border-top: 4px solid #e74c3c; background: radial-gradient(circle at center, #1a0a2a 0%, #05130b 100%); position: relative; overflow: hidden;">
+    
+    <!-- Холст для графика -->
+    <canvas id="crash-canvas" width="800" height="400" style="width: 100%; max-width: 800px; height: 400px; background: rgba(0,0,0,0.4); border-radius: 10px; border: 1px solid #333; margin-bottom: 20px;"></canvas>
+
+    <div id="multiplier-display" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 80px; font-family:'Roboto Mono'; font-weight:700; color: #fff; text-shadow: 0 0 20px #e74c3c; pointer-events: none;">
+        1.0x
+    </div>
+    
+    <p id="status-text" style="color:#aaa; font-size: 18px; margin-bottom: 20px;">Сделайте ставку, чтобы начать</p>
+
+    <div id="bet-form-container">
+        <form id="bet-form" method="POST" action="{{ url_for('crash_start') }}">
+            <input type="number" name="bet" min="1" value="100" placeholder="Ставка" required style="font-size:24px; text-align:center; max-width: 300px; margin: 0 auto;">
+            <button type="submit" style="margin-top:15px; font-size:20px; padding:20px; background: #e74c3c; color:#fff;">🚀 СТАРТ</button>
+        </form>
+    </div>
+
+    <div id="cashout-container" style="display: none;">
+        <button onclick="cashout()" style="margin-top:15px; font-size:24px; padding:20px; background: #2ecc71; color:#fff; width: 100%;">💰 ЗАБРАТЬ <span id="current-win">0</span> 💰</button>
+    </div>
+</div>
+
+<script>
+    let pollInterval;
+    let currentMultiplier = 1.0;
+    const canvas = document.getElementById('crash-canvas');
+    const ctx = canvas.getContext('2d');
+    let points = [];
+
+    // Функция для рисования графика
+    function drawGraph() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        if (points.length < 2) return;
+
+        // Рисуем линию
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+            ctx.lineTo(points[i].x, points[i].y);
+        }
+        ctx.strokeStyle = '#2ecc71';
+        ctx.lineWidth = 4;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#2ecc71';
+        ctx.stroke();
+        
+        // Рисуем ракету на последней точке
+        let lastPoint = points[points.length - 1];
+        ctx.font = "40px Arial";
+        ctx.shadowBlur = 0;
+        ctx.fillText("🚀", lastPoint.x - 20, lastPoint.y - 10);
+        
+        // Рисуем сетку
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+        ctx.lineWidth = 1;
+        ctx.shadowBlur = 0;
+        for(let i=0; i<canvas.width; i+=50) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke(); }
+        for(let i=0; i<canvas.height; i+=50) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke(); }
+    }
+
+    function startPolling() {
+        clearInterval(pollInterval);
+        points = []; // Очищаем график при старте
+        
+        pollInterval = setInterval(() => {
+            fetch('/api/crash').then(r => r.json()).then(data => {
+                if (data.status === 'idle') {
+                    resetUI();
+                } else {
+                    document.getElementById('bet-form-container').style.display = 'none';
+                    document.getElementById('cashout-container').style.display = 'block';
+                    document.getElementById('multiplier-display').innerText = data.multiplier.toFixed(1) + 'x';
+                    
+                    // Добавляем новую точку на график
+                    // X растет в зависимости от множителя (для красоты), Y падает (так как 0,0 это левый верхний угол)
+                    let x = 50 + (data.multiplier * 50);
+                    let y = canvas.height - 50 - (data.multiplier * 30);
+                    points.push({x: x, y: y});
+                    drawGraph();
+
+                    currentMultiplier = data.multiplier;
+                    let betVal = parseInt(document.querySelector('input[name="bet"]').value) || 0;
+                    document.getElementById('current-win').innerText = Math.floor(betVal * currentMultiplier);
+                    
+                    if (data.status === 'crashed') {
+                        clearInterval(pollInterval);
+                        // Рисуем взрыв
+                        ctx.font = "80px Arial";
+                        ctx.fillText("💥", points[points.length-1].x - 40, points[points.length-1].y - 20);
+                        
+                        document.getElementById('multiplier-display').innerText = 'КРАШ!';
+                        document.getElementById('multiplier-display').style.color = '#e74c3c';
+                        document.getElementById('status-text').innerText = 'Ракета взорвалась! Вы проиграли.';
+                        document.getElementById('cashout-container').style.display = 'none';
+                        setTimeout(resetUI, 3000); 
+                    } else {
+                        document.getElementById('status-text').innerText = 'Игра идет! Успейте забрать!';
+                    }
+                }
+            });
+        }, 200);
+    }
+
+    function cashout() {
+        fetch('/crash/cashout', { method: 'POST' }).then(r => r.json()).then(data => {
+            if (data.status === 'ok') {
+                clearInterval(pollInterval);
+                document.getElementById('multiplier-display').innerText = '✅ ' + data.multiplier + 'x';
+                document.getElementById('multiplier-display').style.color = '#2ecc71';
+                document.getElementById('status-text').innerText = `Вы забрали ${data.win} монет!`;
+                document.getElementById('cashout-container').style.display = 'none';
+                setTimeout(() => { window.location.reload(); }, 2000); 
+            }
+        });
+    }
+
+    function resetUI() {
+        clearInterval(pollInterval);
+        points = [];
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById('multiplier-display').innerText = '1.0x';
+        document.getElementById('multiplier-display').style.color = '#fff';
+        document.getElementById('status-text').innerText = 'Сделайте ставку, чтобы начать';
+        document.getElementById('bet-form-container').style.display = 'block';
+        document.getElementById('cashout-container').style.display = 'none';
+    }
+    
+    startPolling();
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Регистрация</h1>
+<p style="text-align:center; color:#aaa; margin-bottom:30px;">Придумайте ник и PIN. ID сгенерируется автоматически.</p>
+
+<div class="card" style="max-width:400px; margin:0 auto;">
+    <form method="POST">
+        <input type="text" name="name" placeholder="Придумайте никнейм" required>
+        <input type="password" name="pin" placeholder="Придумайте PIN (мин. 4 цифры)" minlength="4" required>
+        <button type="submit" style="background: linear-gradient(90deg, #2ecc71 0%, #27ae60 100%);">Создать аккаунт</button>
+    </form>
+    
+    <p style="text-align:center; margin-top:20px;">
+        <a href="{{ url_for('login') }}" style="color:#aaa; text-decoration:none;">Уже есть аккаунт? Войти</a>
+    </p>
+</div>
+{% endblock %}

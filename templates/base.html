@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>StreamBet | Live Casino</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Roboto+Mono:wght@700&display=swap');
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: 'Montserrat', sans-serif; background: linear-gradient(135deg, #05130b 0%, #0a1c13 50%, #05130b 100%); color: #e0e0e0; padding: 20px; overflow-x: hidden; position: relative; }
+    body::before, body::after { content: ''; position: fixed; width: 50vw; height: 50vw; border-radius: 50%; filter: blur(100px); z-index: 0; opacity: 0.4; animation: moveBg 10s infinite alternate ease-in-out; }
+    body::before { background: #005f2a; top: -10vw; left: -10vw; }
+    body::after { background: #d4af37; bottom: -10vw; right: -10vw; animation-delay: -5s; }
+    @keyframes moveBg { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(10vw, 10vw) scale(1.2); } }
+    .container { max-width: 900px; margin: 0 auto; position: relative; z-index: 2; }
+    h1, h2 { font-weight: 900; text-transform: uppercase; color: #fff; text-align: center; text-shadow: 0 0 15px #d4af37; margin-bottom: 20px; }
+    .card { background: rgba(10, 30, 20, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 16px; padding: 25px; margin: 20px 0; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); transition: all 0.4s; position: relative; overflow: hidden; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 15px 45px rgba(0,0,0,0.8), 0 0 20px rgba(212,175,55,0.3); }
+    button, input, select { padding: 14px 20px; border-radius: 8px; border: none; font-size: 16px; font-family: 'Montserrat', sans-serif; margin: 8px 0; width: 100%; font-weight: 700; text-transform: uppercase; transition: all 0.3s; }
+    button { background: linear-gradient(90deg, #0f5a2a 0%, #1f9e4a 100%); color: #fff; cursor: pointer; box-shadow: 0 4px 15px rgba(31, 158, 74, 0.4); }
+    button:hover { filter: brightness(1.2); transform: scale(1.02); box-shadow: 0 0 25px rgba(46,204,113,0.6); }
+    input, select { background: rgba(0, 0, 0, 0.7); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+    input:focus { outline: none; border-color: #2ecc71; box-shadow: 0 0 15px rgba(46,204,113,0.5); }
+    .flash { padding: 15px; border-radius: 8px; margin: 10px 0; font-weight: 700; animation: slideDown 0.5s; }
+    .flash.success { background: rgba(46, 204, 113, 0.2); border-left: 5px solid #2ecc71; color: #2ecc71; }
+    .flash.error { background: rgba(231, 76, 60, 0.2); border-left: 5px solid #e74c3c; color: #ff8b7d; }
+    .balance { font-family: 'Roboto Mono'; font-size: 32px; color: #2ecc71; text-shadow: 0 0 15px #2ecc71; }
+    .bank-money { font-family: 'Roboto Mono'; font-size: 32px; color: #d4af37; text-shadow: 0 0 15px #d4af37; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media(max-width: 600px) { .grid2 { grid-template-columns: 1fr; } }
+    a { color: #2ecc71; text-decoration: none; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: left; }
+    th { color: #d4af37; font-size: 14px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="container">
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in msgs %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>

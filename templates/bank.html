@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>🏦 Личный Банк</h1>
+<div class="card" style="text-align:center;">
+    <p style="color:#aaa;">Ваш сейф</p>
+    <div class="bank-money">{{ player.bank_balance }} 💳</div>
+    <p style="color:#666; font-size:14px;">Деньги здесь защищены от проигрыша</p>
+</div>
+<div class="grid2">
+    <div class="card">
+        <h2>⬇️ В Банк</h2>
+        <form method="POST" action="{{ url_for('bank_transfer') }}">
+            <input type="hidden" name="action" value="to_bank">
+            <input type="number" name="amount" min="1" placeholder="Сумма" required>
+            <button>Перевести в Банк</button>
+        </form>
+    </div>
+    <div class="card">
+        <h2>⬆️ В Казино</h2>
+        <form method="POST" action="{{ url_for('bank_transfer') }}">
+            <input type="hidden" name="action" value="to_casino">
+            <input type="number" name="amount" min="1" placeholder="Сумма" required>
+            <button>Перевести в Казино</button>
+        </form>
+    </div>
+</div>
+<a href="{{ url_for('player') }}"><button>🔙 Вернуться к игре</button></a>
+{% endblock %}

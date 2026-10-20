@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>🛠 Админ-панель (Внутренняя)</h1>
+<p style="text-align:center; color:#aaa;">Для полноценного управления используйте <a href="http://127.0.0.1:5002" target="_blank" style="color:#00D166;">StreamAdmin</a></p>
+
+<div class="card">
+    <h2>👥 Игроки</h2>
+    <table>
+        <tr><th>ID</th><th>Ник</th><th>Баланс</th><th>Статус</th></tr>
+        {% for pid, p in data.players.items() %}
+        <tr>
+            <td>{{ pid }}</td>
+            <td>{{ p.name }}</td>
+            <td style="color:#2ecc71; font-family:'Roboto Mono';">{{ p.balance }}</td>
+            <td>{{ 'BAN' if p.banned else 'OK' }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<a href="{{ url_for('logout') }}"><button>🚪 Выйти</button></a>
+{% endblock %}

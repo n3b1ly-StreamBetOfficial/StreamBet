@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Результат</h1>
+<div class="card" style="text-align:center; padding:50px;">
+    <div style="font-size:120px; font-family:'Roboto Mono'; font-weight:700;
+                color: {% if real_color == 'чёрный' %}#ccc{% elif real_color == 'красный' %}#ff3b3b{% else %}#2ecc71{% endif %};
+                text-shadow: 0 0 40px currentColor;">
+        {{ number }}
+    </div>
+    <h2>{{ real_color|upper }}</h2>
+    <p>Ваш выбор: <strong>{{ chosen }}</strong></p>
+    
+    {% if win > 0 %}
+        <p style="color:#2ecc71; font-size:48px; font-family:'Roboto Mono'; text-shadow: 0 0 20px rgba(46,204,113,0.8);">+{{ win }} 💰</p>
+    {% else %}
+        <p style="color:#ff3b3b; font-size:48px; font-family:'Roboto Mono';">-{{ bet }} 💸</p>
+    {% endif %}
+    
+    <p style="margin-top:30px; color:#aaa;">Баланс в Казино:</p>
+    <span class="balance">{{ player.balance }}</span>
+    <br><br>
+    
+    <!-- ВОТ ЗДЕСЬ МЫ МЕНЯЕМ ССЫЛКУ НА РУЛЕТКУ -->
+    <a href="{{ url_for('roulette') }}"><button style="max-width:300px; margin:0 auto;">🔙 Играть ещё</button></a>
+</div>
+{% endblock %}
